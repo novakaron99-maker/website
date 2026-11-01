@@ -48,8 +48,8 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    const hero = new Image(); hero.src = '/assets/hero-goblin.webp';
-    const imageReady = hero.decode().catch(() => undefined);
+    const logo = new Image(); logo.src = '/assets/goblin-logo.gif';
+    const imageReady = logo.decode().catch(() => undefined);
     Promise.all([new Promise(resolve => setTimeout(resolve, 1050)), Promise.race([imageReady, new Promise(resolve => setTimeout(resolve, 2400))])]).then(() => { if (alive) setReady(true); });
     return () => { alive = false; };
   }, []);
@@ -132,8 +132,7 @@ export default function App() {
 
     <main>
       <section className="hero" id="home" ref={heroRef} aria-labelledby="hero-title">
-        <div className="hero-visual" aria-hidden="true"><img className="hero-image" src="/assets/hero-goblin.webp" alt="" fetchPriority="high" width="1536" height="1024" /><div className="hero-image-fade" /></div>
-        <div className="hero-grid" aria-hidden="true" />
+        <div className="hero-atmosphere" aria-hidden="true" />
         <div className="hero-content container">
           <div className="hero-copy">
             <a className="hero-eyebrow" href="#products"><span className="small-diamond" />BUILT FOR YOUR NEXT LEVEL<ArrowUpRight size={13} /></a>
@@ -142,7 +141,6 @@ export default function App() {
             <div className="hero-buttons"><a className="button button-primary" href="#products">Explore products<ArrowDownRight size={19} /></a><DiscordLink className="discord-hero">Join the community</DiscordLink></div>
             <div className="hero-assurances"><span><Zap size={14} />Fast delivery</span><span><ShieldCheck size={14} />Regular updates</span><span><Headphones size={14} />Dedicated support</span></div>
           </div>
-          <div className="hero-art-label" aria-hidden="true"><span className="art-label-cross">+</span><span>PRECISION ENGINEERED.<br /><strong>GOBLIN APPROVED.</strong></span><span className="art-label-line" /></div>
           <div className="hero-bottom"><a href="#products" className="scroll-cue"><span><ArrowDown size={14} /></span>SCROLL TO DISCOVER</a><a href="#status" className="hero-status"><span className="status-dot" />All products undetected<ArrowUpRight size={14} /></a><span className="hero-coordinate">EST. FOR THE NEXT LEVEL / 001</span></div>
         </div>
         <span className="hero-section-number" aria-hidden="true">G / 01</span>

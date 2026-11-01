@@ -49,7 +49,7 @@ A repó eredeti képei változatlanul megmaradtak. Az oldal optimalizált WebP-v
 | `e580b26b-5b2f-4fd3-893a-00584fcd2029.png` | Permanent Spoofer |
 | `e40cabf9-a007-43b3-aa85-8723b9a1950e.png` | Temporary Spoofer |
 
-A nyitó szekció külön, generált goblin-grafikát kapott (`hero-goblin.webp`). A fejlécben és a termékeknél a feltöltött márkaanyagok szerepelnek. A csökkentett mozgást kérő felhasználók számára a logó állókép, a parallax, a részecskék és a mozgó effektek kikapcsolnak.
+A nyitó szekció letisztult fekete–vörös fényátmenetet kapott, finoman változó fénnyel és lassan felfelé szálló, visszafogott parázsszemcsékkel. A fejlécben és a termékeknél a feltöltött márkaanyagok szerepelnek. A csökkentett mozgást kérő felhasználók számára a logó állókép, a parallax, a részecskék és a mozgó effektek kikapcsolnak.
 
 ## Ellenőrzés
 
