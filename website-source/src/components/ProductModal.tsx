@@ -15,7 +15,7 @@ export default function ProductModal({ product, onClose }: { product: Product; o
   const close = () => {
     if (closing) return;
     setClosing(true);
-    timeoutRef.current = setTimeout(onClose, 180);
+    timeoutRef.current = setTimeout(onClose, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 280);
   };
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function ProductModal({ product, onClose }: { product: Product; o
     };
   }, []);
 
-  return <dialog ref={dialogRef} className={`product-dialog ${closing ? 'dialog-closing' : ''}`} aria-labelledby="product-dialog-title"
+  return <dialog ref={dialogRef} data-lenis-prevent className={`product-dialog ${closing ? 'dialog-closing' : ''}`} aria-labelledby="product-dialog-title"
     onCancel={event => { event.preventDefault(); close(); }}
     onClick={event => { if (event.target === event.currentTarget) close(); }}>
     <div className="product-dialog-inner">
@@ -49,8 +49,8 @@ export default function ProductModal({ product, onClose }: { product: Product; o
               {product.compatibility.length > 0 && <button id="compatibility-tab" role="tab" aria-selected={tab === 'compatibility'} aria-controls="compatibility-panel" tabIndex={tab === 'compatibility' ? 0 : -1} className={tab === 'compatibility' ? 'active' : ''} onClick={() => setTab('compatibility')} onKeyDown={e => { if (['ArrowRight', 'ArrowLeft'].includes(e.key)) { e.preventDefault(); setTab('features'); document.getElementById('features-tab')?.focus(); } }}>Compatibility</button>}
             </div>
             {tab === 'features' ? <div id="features-panel" role="tabpanel" aria-labelledby="features-tab" className="detail-panel" tabIndex={0}>
-              <div className="feature-list">{product.features.map(feature => <div className="detail-feature" key={feature.title}><span><Check size={14} /></span><div><h4>{feature.title}</h4><p>{feature.description}</p></div></div>)}</div>
-              {product.extraFeatures && <><h3 className="extra-features-title">{product.extraFeatures.title}</h3><div className="feature-list">{product.extraFeatures.items.map(feature => <div className="detail-feature" key={feature.title}><span><ShieldCheck size={14} /></span><div><h4>{feature.title}</h4><p>{feature.description}</p></div></div>)}</div></>}
+              <div className="feature-list">{product.features.map((feature, index) => <div className="detail-feature" key={feature.title} style={{ '--item-index': index } as React.CSSProperties}><span><Check size={14} /></span><div><h4>{feature.title}</h4><p>{feature.description}</p></div></div>)}</div>
+              {product.extraFeatures && <><h3 className="extra-features-title">{product.extraFeatures.title}</h3><div className="feature-list">{product.extraFeatures.items.map((feature, index) => <div className="detail-feature" key={feature.title} style={{ '--item-index': index } as React.CSSProperties}><span><ShieldCheck size={14} /></span><div><h4>{feature.title}</h4><p>{feature.description}</p></div></div>)}</div></>}
             </div> : <div id="compatibility-panel" role="tabpanel" aria-labelledby="compatibility-tab" className="detail-panel compatibility-panel" tabIndex={0}>
               <h3>Made for your setup.</h3><p>Supported platforms and hardware, as listed by Goblin Services.</p>
               {product.compatibility.map(item => <div className="compatibility-item" key={item}><CheckCheck size={17} />{item}</div>)}
@@ -60,7 +60,7 @@ export default function ProductModal({ product, onClose }: { product: Product; o
         <aside className="license-panel">
           <div className="license-intro"><span className="eyebrow">MAKE IT YOURS</span><h3>CHOOSE YOUR LICENSE<span>.</span></h3><p>Find the right fit. Unlock your edge.</p></div>
           <fieldset className="license-options"><legend className="sr-only">Select a {product.name} license</legend>
-            {product.licenses.map((option, index) => <label className={`license-option ${selectedLicense === index ? 'selected' : ''}`} key={`${option.group ?? ''}-${option.name}`}>
+            {product.licenses.map((option, index) => <label className={`license-option ${selectedLicense === index ? 'selected' : ''}`} key={`${option.group ?? ''}-${option.name}`} style={{ '--item-index': index } as React.CSSProperties}>
               <input type="radio" name="license" value={index} checked={selectedLicense === index} onChange={() => setSelectedLicense(index)} />
               <span className="license-radio" /><span className="license-name">{option.group && <small>{option.group}</small>}{option.name}{option.recommended && <em>RECOMMENDED</em>}</span><strong>{formatPrice(option.price)}</strong>
             </label>)}

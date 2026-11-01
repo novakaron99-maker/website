@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { gsap } from 'gsap';
 import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUp, ArrowUpRight, AudioLines, Cpu, Headphones, Menu, Plus, ShieldCheck, Sparkles, X, Zap } from 'lucide-react';
 import { Brand, DiscordIcon } from './components/Brand';
 import Embers from './components/Embers';
@@ -6,6 +7,10 @@ import ProductCard, { ProductImage } from './components/ProductCard';
 import ProductModal from './components/ProductModal';
 import { products, type Product } from './data/products';
 import { siteConfig } from './config';
+import { HeroLetters, MotionText } from './components/MotionText';
+import useSmoothScroll from './hooks/useSmoothScroll';
+import useRevealMotion from './hooks/useRevealMotion';
+import useInteractionMotion from './hooks/useInteractionMotion';
 
 const faqs = [
   { question: 'How do I purchase a product?', answer: 'Choose a product, explore its features, and select your preferred license. The purchase button takes you to our Sellhub store, where you can select the matching product and license and complete checkout securely.' },
@@ -18,7 +23,7 @@ const faqs = [
 function LoadingScreen({ ready }: { ready: boolean }) {
   const [visible, setVisible] = useState(true);
   useEffect(() => {
-    if (ready) { const timeout = setTimeout(() => setVisible(false), 700); return () => clearTimeout(timeout); }
+    if (ready) { const timeout = setTimeout(() => setVisible(false), 850); return () => clearTimeout(timeout); }
   }, [ready]);
   if (!visible) return null;
   return <div className={`loading-screen ${ready ? 'loading-complete' : ''}`} role="status" aria-live="polite">
@@ -39,12 +44,32 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [filter, setFilter] = useState('all');
+  const [filtering, setFiltering] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const heroRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const filterTween = useRef<gsap.core.Tween | null>(null);
   const visibleProducts = products.filter(product => filter === 'all' || product.category === filter);
+
+  useSmoothScroll();
+  useRevealMotion(ready, filter);
+  useInteractionMotion(ready);
+
+  const changeFilter = (value: string) => {
+    if (value === filter || filtering) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setFilter(value); return; }
+    setFiltering(true);
+    filterTween.current = gsap.to('.product-card', {
+      y: -18, scale: .97, opacity: 0, duration: .25, stagger: .025, ease: 'power2.in', overwrite: 'auto',
+      onComplete: () => {
+        gsap.set('.product-card', { clearProps: 'transform,opacity,visibility,filter' });
+        setFilter(value); setFiltering(false);
+      },
+    });
+  };
+  useEffect(() => () => { filterTween.current?.kill(); }, []);
 
   useEffect(() => {
     let alive = true;
@@ -53,14 +78,6 @@ export default function App() {
     Promise.all([new Promise(resolve => setTimeout(resolve, 1050)), Promise.race([imageReady, new Promise(resolve => setTimeout(resolve, 2400))])]).then(() => { if (alive) setReady(true); });
     return () => { alive = false; };
   }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observer.unobserve(entry.target); } });
-    }, { threshold: 0.08, rootMargin: '0px 0px -25px 0px' });
-    document.querySelectorAll('.reveal').forEach(element => observer.observe(element));
-    return () => observer.disconnect();
-  }, [filter]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(entries => {
@@ -136,8 +153,8 @@ export default function App() {
         <div className="hero-content container">
           <div className="hero-copy">
             <a className="hero-eyebrow" href="#products"><span className="small-diamond" />BUILT FOR YOUR NEXT LEVEL<ArrowUpRight size={13} /></a>
-            <h1 id="hero-title"><span>YOUR EDGE.</span><span className="hero-red">UNLEASHED<span className="title-period">.</span></span></h1>
-            <p className="hero-description">Precision in every play. Power in your hands.<br />Premium software for those who expect more.</p>
+            <h1 id="hero-title" aria-label="Your edge. Unleashed."><span className="hero-title-line"><HeroLetters text="YOUR EDGE." /></span><span className="hero-red hero-title-line"><HeroLetters text="UNLEASHED" /><span className="title-period motion-letter">.</span></span></h1>
+            <p className="hero-description"><span className="hero-description-line">Precision in every play. Power in your hands.</span><br /><span className="hero-description-line">Premium software for those who expect more.</span></p>
             <div className="hero-buttons"><a className="button button-primary" href="#products">Explore products<ArrowDownRight size={19} /></a><DiscordLink className="discord-hero">Join the community</DiscordLink></div>
             <div className="hero-assurances"><span><Zap size={14} />Fast delivery</span><span><ShieldCheck size={14} />Regular updates</span><span><Headphones size={14} />Dedicated support</span></div>
           </div>
@@ -149,16 +166,16 @@ export default function App() {
       <div className="benefit-strip" aria-label="Goblin Services benefits"><div className="benefit-strip-inner container"><span><span className="tiny-spark">✦</span>OPTIMIZED PERFORMANCE</span><span><span className="tiny-spark">✦</span>FLEXIBLE LICENSES</span><span><span className="tiny-spark">✦</span>REGULAR UPDATES</span><span><span className="tiny-spark">✦</span>RELIABLE SUPPORT</span></div></div>
 
       <section id="products" className="products-section section-space container" aria-labelledby="products-title">
-        <div className="section-heading reveal"><div><span className="eyebrow"><span />01 / THE COLLECTION</span><h2 id="products-title">BUILT TO CHANGE<br />THE <span className="text-red">GAME.</span></h2></div><div className="section-heading-aside"><p>Your playstyle. Your setup. Your edge.<br />Find the tools that move you forward.</p><span className="small-section-label"><span className="small-diamond" />05 PREMIUM PRODUCTS</span></div></div>
-        <div className="product-controls reveal"><div className="product-filters" role="group" aria-label="Filter products">{[['all', 'All products', '05'], ['enhancements', 'Game enhancements', '03'], ['hwid', 'HWID tools', '02']].map(([value, label, count]) => <button key={value} className={filter === value ? 'active' : ''} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}<span>{count}</span></button>)}</div><span className="collection-note"><ShieldCheck size={13} />Quality comes standard.</span></div>
-        <div className={`product-grid ${filter !== 'all' ? 'filtered-grid' : ''}`} aria-live="polite" aria-label={`${visibleProducts.length} products`}>
+        <div className="section-heading reveal"><div><span className="eyebrow"><span />01 / THE COLLECTION</span><h2 id="products-title"><MotionText>BUILT TO CHANGE<br />THE <span className="text-red">GAME.</span></MotionText></h2></div><div className="section-heading-aside"><p>Your playstyle. Your setup. Your edge.<br />Find the tools that move you forward.</p><span className="small-section-label"><span className="small-diamond" />05 PREMIUM PRODUCTS</span></div></div>
+        <div className="product-controls reveal"><div className="product-filters" role="group" aria-label="Filter products">{[['all', 'All products', '05'], ['enhancements', 'Game enhancements', '03'], ['hwid', 'HWID tools', '02']].map(([value, label, count]) => <button key={value} className={filter === value ? 'active' : ''} aria-pressed={filter === value} disabled={filtering} onClick={() => changeFilter(value)}>{label}<span>{count}</span></button>)}</div><span className="collection-note"><ShieldCheck size={13} />Quality comes standard.</span></div>
+        <div className={`product-grid ${filter !== 'all' ? 'filtered-grid' : ''}`} aria-live="polite" aria-busy={filtering} aria-label={`${visibleProducts.length} products`}>
           {visibleProducts.map((product, index) => <ProductCard key={product.id} product={product} onSelect={setSelectedProduct} index={index} />)}
         </div>
         <div className="collection-footer reveal"><span>Not sure where to start?</span><a href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer">Let's find your fit on Discord<ArrowUpRight size={15} /></a></div>
       </section>
 
       <section id="why-goblin" className="why-section section-space" aria-labelledby="why-title"><div className="container">
-        <div className="section-heading reveal"><div><span className="eyebrow"><span />02 / THE GOBLIN STANDARD</span><h2 id="why-title">GOOD ISN'T<br /><span className="text-red">GOOD ENOUGH.</span></h2></div><div className="section-heading-aside"><p>We obsess over the details.<br />So you can focus on what comes next.</p></div></div>
+        <div className="section-heading reveal"><div><span className="eyebrow"><span />02 / THE GOBLIN STANDARD</span><h2 id="why-title"><MotionText>GOOD ISN'T<br /><span className="text-red">GOOD ENOUGH.</span></MotionText></h2></div><div className="section-heading-aside"><p>We obsess over the details.<br />So you can focus on what comes next.</p></div></div>
         <div className="value-grid">
           {[
             { icon: Zap, title: 'PERFORMANCE FIRST.', description: 'Power where it matters. Our tools are designed to keep the experience smooth and the FPS impact low.', number: '01' },
@@ -171,21 +188,21 @@ export default function App() {
       </div></section>
 
       <section id="status" className="status-section section-space container" aria-labelledby="status-title">
-        <div className="status-copy reveal"><span className="eyebrow"><span />03 / STAY IN THE KNOW</span><h2 id="status-title">FULL CLARITY.<br /><span className="text-red">ZERO GUESSWORK.</span></h2><p>Know where things stand.<br />All your product statuses, in one place.</p><div className="status-summary"><div className="status-summary-icon"><ShieldCheck size={24} /><span className="status-orbit" /></div><div><strong>All products undetected</strong><span><span className="status-dot" />5 of 5 products</span></div><AudioLines size={28} className="signal-icon" /></div><p className="status-source">Status information provided by Goblin Services.</p><a className="inline-link" href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer">Get updates on Discord<ArrowUpRight size={16} /></a></div>
+        <div className="status-copy reveal"><span className="eyebrow"><span />03 / STAY IN THE KNOW</span><h2 id="status-title"><MotionText>FULL CLARITY.<br /><span className="text-red">ZERO GUESSWORK.</span></MotionText></h2><p>Know where things stand.<br />All your product statuses, in one place.</p><div className="status-summary"><div className="status-summary-icon"><ShieldCheck size={24} /><span className="status-orbit" /></div><div><strong>All products undetected</strong><span><span className="status-dot" />5 of 5 products</span></div><AudioLines size={28} className="signal-icon" /></div><p className="status-source">Status information provided by Goblin Services.</p><a className="inline-link" href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer">Get updates on Discord<ArrowUpRight size={16} /></a></div>
         <div className="status-board reveal"><div className="status-board-header"><span><span className="status-dot" />PRODUCT STATUS</span><span>05 PRODUCTS</span></div><div className="status-table-heading"><span>PRODUCT</span><span>PUBLISHED STATUS</span><span className="sr-only">Details</span></div>
           {products.map(product => <button className="status-row" key={product.id} onClick={() => setSelectedProduct(product)} aria-label={`${product.name}: ${product.status}. View details.`}><span className="status-product"><span className={`status-thumbnail thumbnail-${product.art}`}><ProductImage product={product} /></span><span>{product.name}<small>{product.category === 'hwid' ? 'HWID TOOL' : product.categoryLabel}</small></span></span><span className="status-pill"><span className="status-dot" />{product.status}</span><ArrowUpRight className="status-row-arrow" size={16} /></button>)}
           <div className="status-board-footer"><span><ShieldCheck size={13} />Reliable products. Dedicated support.</span><span className="board-decor" aria-hidden="true">///</span></div>
         </div>
       </section>
 
-      <section className="community-section container" aria-labelledby="community-title"><div className="community-card reveal"><div className="community-art" aria-hidden="true"><div className="community-orbit orbit-one" /><div className="community-orbit orbit-two" /><div className="community-orbit orbit-three" /><div className="community-logo"><picture><source media="(prefers-reduced-motion: reduce)" srcSet="/assets/goblin-logo-still.webp" /><img src="/assets/goblin-logo.gif" alt="" width="170" height="170" loading="lazy" /></picture></div><span className="community-float float-one"><DiscordIcon width="22" height="22" /></span><span className="community-float float-two"><Zap size={20} /></span><span className="community-mini-label">ONE COMMUNITY. EVERY EDGE.</span></div><div className="community-copy"><span className="eyebrow"><span />BETTER TOGETHER</span><h2 id="community-title">DON'T JUST PLAY.<br /><span className="text-red">BELONG.</span></h2><p>Product updates. Setup help. People who get it.<br />Your next level starts with the right community.</p><DiscordLink className="community-discord">Join our Discord</DiscordLink><span className="community-footnote">THE HOME OF GOBLIN SERVICES</span></div><span className="community-corner" aria-hidden="true">+</span></div></section>
+      <section className="community-section container" aria-labelledby="community-title"><div className="community-card reveal"><div className="community-art" aria-hidden="true"><div className="community-orbit orbit-one" /><div className="community-orbit orbit-two" /><div className="community-orbit orbit-three" /><div className="community-logo"><picture><source media="(prefers-reduced-motion: reduce)" srcSet="/assets/goblin-logo-still.webp" /><img src="/assets/goblin-logo.gif" alt="" width="170" height="170" loading="lazy" /></picture></div><span className="community-float float-one"><DiscordIcon width="22" height="22" /></span><span className="community-float float-two"><Zap size={20} /></span><span className="community-mini-label">ONE COMMUNITY. EVERY EDGE.</span></div><div className="community-copy"><span className="eyebrow"><span />BETTER TOGETHER</span><h2 id="community-title"><MotionText>DON'T JUST PLAY.<br /><span className="text-red">BELONG.</span></MotionText></h2><p>Product updates. Setup help. People who get it.<br />Your next level starts with the right community.</p><DiscordLink className="community-discord">Join our Discord</DiscordLink><span className="community-footnote">THE HOME OF GOBLIN SERVICES</span></div><span className="community-corner" aria-hidden="true">+</span></div></section>
 
-      <section id="faq" className="faq-section section-space container" aria-labelledby="faq-title"><div className="faq-heading reveal"><span className="eyebrow"><span />04 / A LITTLE MORE CLARITY</span><h2 id="faq-title">GOOD QUESTIONS.<br /><span className="text-red">STRAIGHT ANSWERS.</span></h2><p>Still need a hand? We're here for you.</p><a className="inline-link" href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer"><DiscordIcon width="17" height="17" />Let's talk on Discord<ArrowUpRight size={15} /></a></div><div className="faq-list reveal">{faqs.map((faq, index) => <article className={`faq-item ${openFaq === index ? 'faq-open' : ''}`} key={faq.question}><h3><button id={`faq-button-${index}`} aria-expanded={openFaq === index} aria-controls={`faq-answer-${index}`} onClick={() => setOpenFaq(openFaq === index ? null : index)}><span className="faq-number">0{index + 1}</span><span>{faq.question}</span><span className="faq-plus"><Plus size={17} /></span></button></h3><div id={`faq-answer-${index}`} className="faq-answer" role="region" aria-labelledby={`faq-button-${index}`} aria-hidden={openFaq !== index} inert={openFaq !== index}><div><p>{faq.answer}</p></div></div></article>)}</div></section>
+      <section id="faq" className="faq-section section-space container" aria-labelledby="faq-title"><div className="faq-heading reveal"><span className="eyebrow"><span />04 / A LITTLE MORE CLARITY</span><h2 id="faq-title"><MotionText>GOOD QUESTIONS.<br /><span className="text-red">STRAIGHT ANSWERS.</span></MotionText></h2><p>Still need a hand? We're here for you.</p><a className="inline-link" href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer"><DiscordIcon width="17" height="17" />Let's talk on Discord<ArrowUpRight size={15} /></a></div><div className="faq-list reveal">{faqs.map((faq, index) => <article className={`faq-item ${openFaq === index ? 'faq-open' : ''}`} key={faq.question}><h3><button id={`faq-button-${index}`} aria-expanded={openFaq === index} aria-controls={`faq-answer-${index}`} onClick={() => setOpenFaq(openFaq === index ? null : index)}><span className="faq-number">0{index + 1}</span><span>{faq.question}</span><span className="faq-plus"><Plus size={17} /></span></button></h3><div id={`faq-answer-${index}`} className="faq-answer" role="region" aria-labelledby={`faq-button-${index}`} aria-hidden={openFaq !== index} inert={openFaq !== index}><div><p>{faq.answer}</p></div></div></article>)}</div></section>
 
-      <section className="final-cta container reveal" aria-labelledby="final-title"><span className="eyebrow"><span />MAKE YOUR NEXT MOVE</span><h2 id="final-title">THE EDGE IS <span>YOURS.</span></h2><a className="button button-primary" href="#products">Find your product<ArrowUpRight size={19} /></a><div className="cta-corner top-left" /><div className="cta-corner bottom-right" /><span className="cta-star" aria-hidden="true">✦</span></section>
+      <section className="final-cta container reveal" aria-labelledby="final-title"><span className="eyebrow"><span />MAKE YOUR NEXT MOVE</span><h2 id="final-title"><MotionText>THE EDGE IS <span>YOURS.</span></MotionText></h2><a className="button button-primary" href="#products">Find your product<ArrowUpRight size={19} /></a><div className="cta-corner top-left" /><div className="cta-corner bottom-right" /><span className="cta-star" aria-hidden="true">✦</span></section>
     </main>
 
-    <footer className="site-footer"><div className="container"><div className="footer-main"><div className="footer-brand"><Brand /><p>Premium software.<br />For your next level.</p></div><div className="footer-links"><span>EXPLORE</span><a href="#products">Products<ArrowUpRight size={12} /></a><a href="#why-goblin">Why Goblin<ArrowUpRight size={12} /></a><a href="#status">Product status<ArrowUpRight size={12} /></a></div><div className="footer-links"><span>CONNECT</span><a href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer">Discord<ArrowUpRight size={12} /></a><a href={siteConfig.storeUrl} target="_blank" rel="noopener noreferrer">Visit store<ArrowUpRight size={12} /></a><a href="#faq">FAQ & support<ArrowUpRight size={12} /></a></div><div className="footer-signoff"><span className="status-dot" /><span>YOUR EDGE.<br /><strong>UNLEASHED.</strong></span><a href="#home" className="back-to-top" aria-label="Back to top"><ArrowUp size={19} /></a></div></div><div className="footer-bottom"><span>© {new Date().getFullYear()} Goblin Services. All rights reserved.</span><span>DESIGNED FOR WHAT'S NEXT.<span className="text-red">✦</span></span></div></div></footer>
+    <footer className="site-footer"><div className="container"><div className="footer-main reveal"><div className="footer-brand"><Brand /><p>Premium software.<br />For your next level.</p></div><div className="footer-links"><span>EXPLORE</span><a href="#products">Products<ArrowUpRight size={12} /></a><a href="#why-goblin">Why Goblin<ArrowUpRight size={12} /></a><a href="#status">Product status<ArrowUpRight size={12} /></a></div><div className="footer-links"><span>CONNECT</span><a href={siteConfig.discordUrl} target="_blank" rel="noopener noreferrer">Discord<ArrowUpRight size={12} /></a><a href={siteConfig.storeUrl} target="_blank" rel="noopener noreferrer">Visit store<ArrowUpRight size={12} /></a><a href="#faq">FAQ & support<ArrowUpRight size={12} /></a></div><div className="footer-signoff"><span className="status-dot" /><span>YOUR EDGE.<br /><strong>UNLEASHED.</strong></span><a href="#home" className="back-to-top" aria-label="Back to top"><ArrowUp size={19} /></a></div></div><div className="footer-bottom reveal"><span>© {new Date().getFullYear()} Goblin Services. All rights reserved.</span><span>DESIGNED FOR WHAT'S NEXT.<span className="text-red">✦</span></span></div></div></footer>
     {selectedProduct && <ProductModal key={selectedProduct.id} product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
     <div className="mobile-store-bar"><a href="#products"><span><span className="status-dot" />Find your next edge</span><span>Explore products<ArrowRight size={15} /></span></a></div>
   </div>;

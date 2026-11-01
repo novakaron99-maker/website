@@ -51,6 +51,18 @@ A repó eredeti képei változatlanul megmaradtak. Az oldal optimalizált WebP-v
 
 A nyitó szekció letisztult fekete–vörös fényátmenetet kapott, finoman változó fénnyel és lassan felfelé szálló, visszafogott parázsszemcsékkel. A fejlécben és a termékeknél a feltöltött márkaanyagok szerepelnek. A csökkentett mozgást kérő felhasználók számára a logó állókép, a parallax, a részecskék és a mozgó effektek kikapcsolnak.
 
+## Mozgás és animáció
+
+A GSAP időzíti a betűnkénti főcímet, a szavankénti címbelépéseket, a görgetéskor egymás után érkező tartalmakat és a termékszűrés átmeneteit. A Lenis az egérgörgős és horgonylinkes görgetést simítja; a telefonos érintéses görgetés natív marad. A termékablakok külön görgethetők, megnyitásukkor a háttér megáll.
+
+- `src/hooks/useRevealMotion.ts`: belépési sorrendek, időzítések és képanimációk.
+- `src/hooks/useInteractionMotion.ts`: egérkövető gombok, finom kártyadőlés, fényfolt, képparallax és érintési fényhullám.
+- `src/hooks/useSmoothScroll.ts`: a görgetés sebessége, lassulása és a horgonylinkek kezelése.
+- `src/motion.css`: hover, lenyomás, mobilmenü, termékablak, licencválasztó és FAQ mozgása.
+- `src/components/Embers.tsx`: lassan emelkedő, fényes maggal és lágy fényudvarral rajzolt parázsszemcsék; mobilon kisebb sűrűség, háttérben lévő böngészőfülön szüneteltetett rajzolás.
+
+A rendszer tiszteletben tartja a készülék csökkentett mozgás beállítását: ilyenkor a teljes tartalom látható, a görgetés natív, a részecskék és az intenzív mozgások kikapcsolnak. A belépési effektusok nem rejtik el a tartalmat a képernyőolvasók vagy a billentyűzetes navigáció elől.
+
 ## Ellenőrzés
 
 ```sh

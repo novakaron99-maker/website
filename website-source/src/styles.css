@@ -120,13 +120,6 @@ h1 .hero-red { color: var(--red); margin-top: 8px; text-shadow: 0 5px 40px #ef27
 .hero-coordinate { font-size: 7px; letter-spacing: 1.4px; color: #62565b; }
 .hero-section-number { position: absolute; left: 18px; top: 55%; writing-mode: vertical-rl; color: #5a454c; font-size: 8px; letter-spacing: 3px; }
 .site-loading .hero-copy > *, .site-loading .hero-bottom { opacity: 0; }
-.site-ready .hero-eyebrow { animation: fade-up .8s .15s both; }
-.site-ready h1 > span:first-child { animation: title-in .9s .2s both; }
-.site-ready h1 > span:last-child { animation: title-in .9s .34s both; }
-.site-ready .hero-description { animation: fade-up .8s .5s both; }
-.site-ready .hero-buttons { animation: fade-up .8s .6s both; }
-.site-ready .hero-assurances { animation: fade-up .8s .7s both; }
-.site-ready .hero-bottom { animation: fade-up 1s .8s both; }
 .benefit-strip { border-block: 1px solid var(--line); background: #0c0c0f; position: relative; }
 .benefit-strip-inner { display: flex; justify-content: space-between; align-items: center; height: 67px; gap: 25px; }
 .benefit-strip-inner > span { display: flex; align-items: center; gap: 25px; font-size: 9px; font-weight: 500; letter-spacing: 1.5px; color: #a29aa1; white-space: nowrap; }
@@ -393,9 +386,6 @@ h1 .hero-red { color: var(--red); margin-top: 8px; text-shadow: 0 5px 40px #ef27
 .license-support a:hover { color: #d5adff; }
 
 /* Motion */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity .75s var(--reveal-delay,0ms), transform .75s cubic-bezier(.2,.65,.3,1) var(--reveal-delay,0ms); }
-.reveal.is-visible { opacity: 1; transform: translateY(0); }
-.product-card.reveal.is-visible:hover { transform: translateY(-5px); transition-delay: 0ms; }
 .loading-screen { position: fixed; inset: 0; z-index: 200; background: #08080b; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity .55s .1s, visibility .55s .1s; }
 .loading-complete { opacity: 0; visibility: hidden; pointer-events: none; }
 .loader-halo { position: absolute; width: 380px; height: 380px; background: radial-gradient(circle,#9d142d25,transparent 65%); animation: loader-breathe 2s ease-in-out infinite; }
